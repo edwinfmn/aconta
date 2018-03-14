@@ -1,0 +1,184 @@
+
+<div class="container">
+<button type="button" class="btn btn-outline-primary btn-sm" (click)="show=!show;">Show/Hide</button>
+<br>
+<div class="row" *ngIf="show">
+  <pre><small> {{ bp | json }} </small>
+  <small> {{ location | json }} </small>
+  <small> {{ BPLocation | json }} </small></pre>
+</div>
+<div class="row">
+  <button type="button" class="btn btn-outline-primary btn-sm" (click)="nuevo=!nuevo;">Añadir Nuevo</button>
+</div>
+<div class="row" *ngIf="nuevo" >
+  <form (ngSubmit)="save()" #forma="ngForm" style="width:100%;">
+
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <input [(ngModel)]="bp.searchKey"
+               name="searchKey"
+               class="form-control"
+               type="text"
+               placeholder="Search Key"
+               required>
+      </div>
+      <div class="form-group col-md-6">
+        <input [(ngModel)]="bp.taxID"
+               name="taxid"
+               class="form-control"
+               type="text"
+               placeholder="RUC / TaxID">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <input [(ngModel)]="bp.name"
+               name="nombre"
+               class="form-control"
+               type="text"
+               placeholder="Name"
+               required>
+      </div>
+      <div class="form-group col-md-6">
+        <ngx-select [items]="priceList"
+                    name="price"
+                    [(ngModel)]="bp.priceList"
+                    optionValueField="id"
+                    optionTextField="name"
+                    allowClear=true
+                    placeholder="Select price list">
+        </ngx-select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-12">
+        <input [(ngModel)]="location.addressLine1"
+               name="direccion"
+               class="form-control"
+               type="text"
+               placeholder="Direccion"
+               required>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <input [(ngModel)]="location.phone"
+               name="telf"
+               class="form-control"
+               type="text"
+               placeholder="Telefono"
+               required>
+      </div>
+      <div class="form-group col-md-6">
+        <input [(ngModel)]="location.postalCode"
+               name="postal"
+               class="form-control"
+               type="text"
+               placeholder="Postal Code"
+               required>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <ngx-select [items]="countries"
+                    name="country"
+                    [(ngModel)]="location.country"
+                    optionValueField="id"
+                    optionTextField="name"
+                    allowClear=true
+                    placeholder="Select country">
+        </ngx-select>
+      </div>
+      <div class="form-group col-md-6">
+        <input [(ngModel)]="location.cityName"
+               name="city"
+               class="form-control"
+               type="text"
+               placeholder="City"
+               required>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <button [disabled]="!forma.valid"
+          type="submit"
+          class="btn btn-outline-primary">
+        Save
+      </button>
+    </div>
+
+  </form>
+</div>
+
+<hr>
+<div class="row">
+    <table class="table table-bordered table-striped table-hover table-sm">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th (click)="sort('searchKey')">Search Key
+            <span class="fa " *ngIf="key =='searchKey'" [ngClass]="{'fa-chevron-up':reverse,'fa-chevron-down':!reverse}"></span>
+          </th>
+          <th (click)="sort('name')">Name
+            <span class="fa" *ngIf="key =='name'" [ngClass]="{'fa-chevron-up':reverse,'fa-chevron-down':!reverse}"></span>
+          </th>
+          <th (click)="sort('priceList$_identifier')">Pricelist
+            <span class="fa" *ngIf="key =='priceList$_identifier'" [ngClass]="{'fa-chevron-up':reverse,'fa-chevron-down':!reverse}"></span>
+          </th>
+          <th (click)="sort('vendor')">Vendor
+            <span class="fa" *ngIf="key =='vendor'" [ngClass]="{'fa-chevron-up':reverse,'fa-chevron-down':!reverse}"></span>
+          </th>
+          <th (click)="sort('customer')">Customer
+            <span class="fa" *ngIf="key =='customer'" [ngClass]="{'fa-chevron-up':reverse,'fa-chevron-down':!reverse}"></span>
+          </th>
+          <th></th>
+        </tr>
+        <tr>
+          <th colspan="7">
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text"> <i class="fa fa-search"></i> </span>
+              </div>
+              <input class="form-control form-control-sm" type="text" placeholder="Buscar..." [(ngModel)]="searchTxt">
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let bp of bps | filter:searchTxt | orderBy: key : reverse | paginate: { itemsPerPage: qtyItems, currentPage: p }; let i = index">
+          <td>{{i+1}}</td>
+          <td>{{bp.searchKey}}</td>
+          <td>{{bp.name}}</td>
+          <td>{{bp.priceList$_identifier}}</td>
+          <td><span class="fa" [ngClass]="{'fa-check':bp.vendor,'fa-close':!bp.vendor}"></span></td>
+          <td><span class="fa" [ngClass]="{'fa-check':bp.customer,'fa-close':!bp.customer}"></span></td>
+          <button (click)="delete(bp)"
+                  type="button"
+                  class="btn btn-outline-danger btn-sm">
+                  <span class="fa fa-trash"></span>
+                  </button>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="row">
+    <div class="col-md-9">
+      <pagination-controls (pageChange)="p = $event" previousLabel="Anterior" nextLabel="Siguiente"></pagination-controls>
+    </div>
+    <div class="col-md-3 text-right">
+      Items: <select class="text-sm" [(ngModel)]="qtyItems">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="15">15</option>
+        <option value="20">20</option>
+        <option value="25">25</option>
+      </select>
+    </div>
+
+  </div>
+
+</div>
